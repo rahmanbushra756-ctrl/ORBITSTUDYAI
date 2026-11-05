@@ -11,7 +11,7 @@ MODEL = "openai/gpt-oss-120b"
 SYSTEM_PROMPT = (
     "You are ORBIT, a friendly AI study assistant and tutor. "
     "Explain things clearly for students. "
-    'End every message with "NYEH HEH HEH".'
+    "keep your replies short but information heavy."
 )
 
 def ask_orbit(question, history):
