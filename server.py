@@ -15,17 +15,25 @@ SYSTEM_PROMPT = (
 )
 
 def ask_orbit(question, history):
-    url = "https://api.groq.com/openai/v1/chat/completions"
+    client = Groq(api_key=API_KEY)
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    # Include recent conversation context.
     for item in history[-100:]:
         role = item.get("role")
         content = item.get("content", "")
 
         if role in ("user", "assistant") and isinstance(content, str):
             messages.append({"role": role, "content": content})
+
+    messages.append({"role": "user", "content": question})
+
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=messages
+    )
+
+    return response.choices[0].message.content
 
     # Add the current question last.
     messages.append({"role": "user", "content": question})
