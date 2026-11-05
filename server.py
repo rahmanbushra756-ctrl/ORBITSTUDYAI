@@ -74,6 +74,7 @@ class OrbitHandler(SimpleHTTPRequestHandler):
 
         except urllib.error.HTTPError as error:
             answer = "Groq API error: " + error.read().decode("utf-8")
+            print(answer)
             status = 502
         except Exception as error:
             answer = "Error: " + str(error)
