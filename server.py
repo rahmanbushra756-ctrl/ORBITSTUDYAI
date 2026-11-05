@@ -1,4 +1,4 @@
-from groq import Groq
+
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import urllib.request
@@ -6,7 +6,7 @@ import urllib.error
 import os
 
 API_KEY = os.environ.get("GROQ_API_KEY", "")
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "openai/gpt-oss-120b"
 
 SYSTEM_PROMPT = (
     "You are ORBIT, a friendly AI study assistant and tutor. "
@@ -15,7 +15,7 @@ SYSTEM_PROMPT = (
 )
 
 def ask_orbit(question, history):
-    client = Groq(api_key=API_KEY)
+    url = "https://api.groq.com/openai/v1/chat/completions"
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
@@ -28,16 +28,6 @@ def ask_orbit(question, history):
 
     messages.append({"role": "user", "content": question})
 
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=messages
-    )
-
-    return response.choices[0].message.content
-
-    # Add the current question last.
-    messages.append({"role": "user", "content": question})
-
     data = {
         "model": MODEL,
         "messages": messages
@@ -48,7 +38,8 @@ def ask_orbit(question, history):
         data=json.dumps(data).encode("utf-8"),
         headers={
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + API_KEY
+            "Authorization": "Bearer " + API_KEY,
+            "User-Agent": "ORBIT-AI/1.0"
         },
         method="POST"
     )
@@ -87,6 +78,7 @@ class OrbitHandler(SimpleHTTPRequestHandler):
             status = 502
         except Exception as error:
             answer = "Error: " + str(error)
+            print(answer)
             status = 500
 
         body = json.dumps({"answer": answer}).encode("utf-8")
