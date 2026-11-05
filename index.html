@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ORBIT — Student AI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="logo">O</div>
+      <div>
+        <h1>ORBIT</h1>
+        <p class="subtitle">Your student AI assistant</p>
+      </div>
+    </header>
+
+    <section class="chat">
+      <div id="messages" class="messages" aria-live="polite">
+        <div class="message orbit-message">
+          Hello! I'm ORBIT. What would you like to learn today?
+        </div>
+      </div>
+
+      <form id="chat-form">
+        <label class="sr-only" for="question">Your question</label>
+        <textarea id="question" rows="2"
+          placeholder="Ask ORBIT a question..." required></textarea>
+        <button id="send" type="submit">Ask ORBIT</button>
+       <button id="clear-chat" type="button">Clear Chat</button>
+      </form>
+      <p class="hint">Press Enter to send · Shift + Enter for a new line</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
