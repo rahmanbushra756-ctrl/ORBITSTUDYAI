@@ -1,3 +1,4 @@
+from groq import Groq
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import urllib.request
