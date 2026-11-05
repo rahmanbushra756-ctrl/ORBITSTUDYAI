@@ -28,12 +28,14 @@
         <textarea id="question" rows="2"
           placeholder="Ask ORBIT a question..." required></textarea>
         <button id="send" type="submit">Ask ORBIT</button>
-       <button id="clear-chat" type="button">Clear Chat</button>
+        <button id="clear-chat" type="button">Clear Chat</button>
       </form>
       <p class="hint">Press Enter to send · Shift + Enter for a new line</p>
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
