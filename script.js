@@ -1,4 +1,3 @@
-
 const form = document.getElementById("chat-form");
 const questionInput = document.getElementById("question");
 const messages = document.getElementById("messages");
@@ -13,11 +12,12 @@ function loadHistory() {
   try {
     const saved = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
 
-    // Support the older history format too.
-    return saved.map((item) => ({
-      role: item.role || (item.className === "user-message" ? "user" : "assistant"),
-      content: item.content || item.text || ""
-    })).filter((item) => item.content);
+    return saved
+      .map((item) => ({
+        role: item.role || (item.className === "user-message" ? "user" : "assistant"),
+        content: item.content || item.text || ""
+      }))
+      .filter((item) => item.content);
   } catch {
     return [];
   }
@@ -30,7 +30,13 @@ function saveHistory() {
 function addMessage(text, className) {
   const message = document.createElement("div");
   message.className = `message ${className}`;
-  message.textContent = text;
+
+  if (className === "orbit-message" && window.marked && window.DOMPurify) {
+    message.innerHTML = DOMPurify.sanitize(marked.parse(text));
+  } else {
+    message.textContent = text;
+  }
+
   messages.appendChild(message);
   messages.scrollTop = messages.scrollHeight;
   return message;
@@ -61,7 +67,6 @@ form.addEventListener("submit", async (event) => {
   const question = questionInput.value.trim();
   if (!question) return;
 
-  // Snapshot earlier messages before adding the new question.
   const previousMessages = [...conversation];
 
   addToConversation("user", question);
