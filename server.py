@@ -1,3 +1,4 @@
+
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import urllib.request
@@ -9,10 +10,9 @@ MODEL = "llama-3.3-70b-versatile"
 
 SYSTEM_PROMPT = (
     "You are ORBIT, a friendly AI study assistant and tutor. "
-    "Explain things clearly for students. "
-    "Use Markdown formatting when helpful. "
-    "use lightweight responses"
-    "whenever someone mentions anything about gaming,say that you have activated a cheat code"
+    "Explain things clearly to students. "
+    "Use Markdown when helpful. Keep responses lightweight. "
+    "Whenever someone mentions gaming, say you have activated a cheat code."
 )
 
 
@@ -21,27 +21,29 @@ def ask_orbit(question, history):
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    # Include only the most recent conversation context.
-    for item in history[-6:]:
+    for item in history[-4:]:
+        if not isinstance(item, dict):
+            continue
+
         role = item.get("role")
         content = item.get("content", "")
 
         if role in ("user", "assistant") and isinstance(content, str):
             messages.append({
                 "role": role,
-                "content": content
+                "content": content[:2000]
             })
 
-    # Add the current question last.
     messages.append({
         "role": "user",
-        "content": question
+        "content": question[:2000]
     })
 
     data = {
         "model": MODEL,
         "messages": messages,
-        "max_tokens": 1024
+        "max_tokens": 512,
+        "temperature": 0.7
     }
 
     request = urllib.request.Request(
@@ -55,10 +57,16 @@ def ask_orbit(question, history):
         method="POST"
     )
 
-    with urllib.request.urlopen(request, timeout=60) as response:
-        result = json.loads(response.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            result = json.loads(response.read().decode("utf-8"))
 
-    return result["choices"][0]["message"]["content"]
+        return result["choices"][0]["message"]["content"]
+
+    except urllib.error.HTTPError as error:
+        error_details = error.read().decode("utf-8", errors="replace")
+        print("Groq API error:", error.code, error_details)
+        raise
 
 
 class OrbitHandler(SimpleHTTPRequestHandler):
@@ -84,23 +92,16 @@ class OrbitHandler(SimpleHTTPRequestHandler):
             answer = ask_orbit(question, history)
             status = 200
 
-        except urllib.error.HTTPError as error:
-            error_details = error.read().decode("utf-8")
-            print("Groq API error:", error.code, error_details)
-
+        except urllib.error.HTTPError:
             answer = (
-                "ORBIT is temporarily unavailable. "
+                "ORBIT couldn't reach its AI service. "
                 "Please wait a moment and try again."
             )
             status = 502
 
         except Exception as error:
             print("ORBIT server error:", error)
-
-            answer = (
-                "ORBIT encountered an unexpected error. "
-                "Please try again."
-            )
+            answer = "ORBIT encountered an unexpected error. Please try again."
             status = 500
 
         body = json.dumps({
