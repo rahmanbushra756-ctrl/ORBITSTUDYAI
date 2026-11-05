@@ -1,4 +1,3 @@
-
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import urllib.request
@@ -6,31 +5,43 @@ import urllib.error
 import os
 
 API_KEY = os.environ.get("GROQ_API_KEY", "")
-MODEL = "openai/gpt-oss-120b"
+MODEL = "llama-3.3-70b-versatile"
 
 SYSTEM_PROMPT = (
     "You are ORBIT, a friendly AI study assistant and tutor. "
     "Explain things clearly for students. "
-    "keep your replies short but information heavy."
+    "Use Markdown formatting when helpful. "
+    "use lightweight responses"
+    "whenever someone mentions anything about gaming,say that you have activated a cheat code"
 )
+
 
 def ask_orbit(question, history):
     url = "https://api.groq.com/openai/v1/chat/completions"
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    for item in history[-100:]:
+    # Include only the most recent conversation context.
+    for item in history[-6:]:
         role = item.get("role")
         content = item.get("content", "")
 
         if role in ("user", "assistant") and isinstance(content, str):
-            messages.append({"role": role, "content": content})
+            messages.append({
+                "role": role,
+                "content": content
+            })
 
-    messages.append({"role": "user", "content": question})
+    # Add the current question last.
+    messages.append({
+        "role": "user",
+        "content": question
+    })
 
     data = {
         "model": MODEL,
-        "messages": messages
+        "messages": messages,
+        "max_tokens": 1024
     }
 
     request = urllib.request.Request(
@@ -51,6 +62,7 @@ def ask_orbit(question, history):
 
 
 class OrbitHandler(SimpleHTTPRequestHandler):
+
     def do_POST(self):
         if self.path != "/chat":
             self.send_error(404)
@@ -73,15 +85,27 @@ class OrbitHandler(SimpleHTTPRequestHandler):
             status = 200
 
         except urllib.error.HTTPError as error:
-            answer = "Groq API error: " + error.read().decode("utf-8")
-            print(answer)
+            error_details = error.read().decode("utf-8")
+            print("Groq API error:", error.code, error_details)
+
+            answer = (
+                "ORBIT is temporarily unavailable. "
+                "Please wait a moment and try again."
+            )
             status = 502
+
         except Exception as error:
-            answer = "Error: " + str(error)
-            print(answer)
+            print("ORBIT server error:", error)
+
+            answer = (
+                "ORBIT encountered an unexpected error. "
+                "Please try again."
+            )
             status = 500
 
-        body = json.dumps({"answer": answer}).encode("utf-8")
+        body = json.dumps({
+            "answer": answer
+        }).encode("utf-8")
 
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
@@ -92,5 +116,6 @@ class OrbitHandler(SimpleHTTPRequestHandler):
 
 port = int(os.environ.get("PORT", 8001))
 server = HTTPServer(("0.0.0.0", port), OrbitHandler)
+
 print(f"ORBIT is running on port {port}")
 server.serve_forever()
