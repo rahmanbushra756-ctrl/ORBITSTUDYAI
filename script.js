@@ -1,3 +1,4 @@
+
 const form = document.getElementById("chat-form");
 const questionInput = document.getElementById("question");
 const messages = document.getElementById("messages");
@@ -14,7 +15,9 @@ function loadHistory() {
 
     return saved
       .map((item) => ({
-        role: item.role || (item.className === "user-message" ? "user" : "assistant"),
+        role:
+          item.role ||
+          (item.className === "user-message" ? "user" : "assistant"),
         content: item.content || item.text || ""
       }))
       .filter((item) => item.content);
@@ -75,24 +78,32 @@ form.addEventListener("submit", async (event) => {
   sendButton.disabled = true;
   sendButton.textContent = "Thinking...";
 
-  const waitingMessage = addMessage("ORBIT is thinking...", "orbit-message");
+  const waitingMessage = addMessage(
+    "ORBIT is thinking...",
+    "orbit-message"
+  );
 
   try {
-    const response = await fetch("https://orbitstudyai.onrender.com/chat", {, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        question,
-        history: previousMessages
-      })
-    });
+    const response = await fetch(
+      "https://orbitstudyai.onrender.com/chat",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          question,
+          history: previousMessages
+        })
+      }
+    );
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.answer || `Server error (${response.status})`);
+      throw new Error(
+        data.answer || `Server error (${response.status})`
+      );
     }
 
     const answer = data.answer || "I didn't receive an answer.";
@@ -101,7 +112,7 @@ form.addEventListener("submit", async (event) => {
     addToConversation("assistant", answer);
   } catch (error) {
     waitingMessage.textContent =
-      "Couldn't reach ORBIT. Check that server.py is running.\n" +
+      "Couldn't reach ORBIT. Check your connection and try again.\n" +
       error.message;
   } finally {
     sendButton.disabled = false;
