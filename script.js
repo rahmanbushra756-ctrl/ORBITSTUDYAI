@@ -78,7 +78,7 @@ form.addEventListener("submit", async (event) => {
   const waitingMessage = addMessage("ORBIT is thinking...", "orbit-message");
 
   try {
-    const response = await fetch("/chat", {
+    const response = await fetch("https://orbitstudyai.onrender.com/chat", {, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
