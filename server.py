@@ -5,7 +5,7 @@ import urllib.error
 import os
 
 API_KEY = os.environ.get("GROQ_API_KEY", "")
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "openai/gpt-oss-20b"
 
 SYSTEM_PROMPT = (
     "You are ORBIT, a friendly AI study assistant and tutor. "
