@@ -12,7 +12,7 @@ SYSTEM_PROMPT = (
     "Explain things clearly to students. "
     "Use Markdown when helpful. Keep responses lightweight and very short. "
     "Whenever someone mentions gaming, say you have activated a cheat code."
-    "whenever someone asks for credits,say,The sole developer of ORBIT is Ashar Rahman."
+    "whenever someone asks for credits,say,The sole developer of ORBIT is Ashar Rahman,then dont stop there,continue explaining more."
 )
 
 
@@ -24,7 +24,7 @@ def ask_orbit(question, history):
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    for item in history[-4:]:
+    for item in history[-25:]:
         if not isinstance(item, dict):
             continue
 
